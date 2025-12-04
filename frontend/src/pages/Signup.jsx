@@ -1,41 +1,69 @@
 import React, { useState } from 'react';
-// Signup page for creating a new user
+import { useNavigate } from 'react-router-dom';
+
 function Signup() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Handle form input changes
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // Handle form submission
-  async function handleSubmit(e) {
+  async function handleSignup(e) {
     e.preventDefault();
-    setMessage('');
-    const res = await fetch('http://localhost:5000/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setMessage('Signup successful! You can now log in.');
-    } else {
-      setMessage(data.message || 'Signup failed');
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.username && data.token) {
+        alert(`Welcome, ${data.username}!`);
+        localStorage.setItem('token', data.token);
+        navigate('/home');
+      } else {
+        alert(data.message || 'Signup failed');
+      }
+    } catch (err) {
+      alert('Network error');
     }
+    setLoading(false);
   }
 
   return (
     <div>
       <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="username" placeholder="Username" value={form.username} onChange={handleChange} required /><br />
-        <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required /><br />
-        <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required /><br />
-        <button type="submit">Sign Up</button>
+      <form onSubmit={handleSignup}>
+        <input
+          name="username"
+          placeholder="Username"
+          value={form.username}
+          onChange={handleChange}
+          required
+        /><br />
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        /><br />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
+        /><br />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Create Account'}
+        </button>
       </form>
-      <div>{message}</div>
     </div>
   );
 }

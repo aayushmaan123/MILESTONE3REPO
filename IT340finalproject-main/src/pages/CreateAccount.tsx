@@ -19,7 +19,7 @@ const CreateAccount = () => {
     password: '',
     confirmPassword: ''
   });
-  const [apiMessage, setApiMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -70,31 +70,34 @@ const CreateAccount = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiMessage('');
     if (validateForm()) {
-      // Send signup request to backend
-      const res = await fetch('http://localhost:5000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: formData.fullName,
-          email: formData.email,
-          password: formData.password
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setApiMessage('Account created! You can now log in.');
-        setTimeout(() => navigate('/login'), 1000);
-      } else {
-        setApiMessage(data.message || 'Signup failed');
+      setLoading(true);
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.fullName,
+            email: formData.email,
+            password: formData.password
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.username && data.token) {
+          localStorage.setItem('token', data.token);
+          navigate('/welcome', { state: { username: data.username } });
+        } else {
+          alert(data.message || 'Signup failed');
+        }
+      } catch (err) {
+        alert('Network error. Make sure your backend is running at http://localhost:5000 and MongoDB is started.');
       }
+      setLoading(false);
     }
   };
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -181,14 +184,14 @@ const CreateAccount = () => {
                 <button 
                   type="submit"
                   className="group/button relative inline-flex justify-center items-center overflow-hidden rounded-md bg-primary text-primary-foreground px-6 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-primary/50 cursor-pointer"
+                  disabled={loading}
                 >
-                  <span className="relative z-10">Create Account</span>
+                  <span className="relative z-10">{loading ? 'Creating Account...' : 'Create Account'}</span>
                   <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
                     <div className="relative h-full w-8 bg-white/20" />
                   </div>
                 </button>
               </div>
-              {apiMessage && <div className="mt-2 text-center text-sm text-blue-600">{apiMessage}</div>}
               <div className='mt-6'>
                 <Link to="/login" className='text-sm text-muted-foreground hover:text-foreground transition-colors'>
                   Already have an account? <span className="underline">Log in</span>

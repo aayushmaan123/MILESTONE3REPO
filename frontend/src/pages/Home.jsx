@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// Home page that fetches user info using the stored JWT
+
 function Home() {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState('');
@@ -8,10 +8,10 @@ function Home() {
     const token = localStorage.getItem('token');
     if (!token) {
       setMessage('Not logged in.');
+      window.location.href = '/login';
       return;
     }
-    // Fetch user info from backend
-    fetch('http://localhost:5000/me', {
+    fetch('http://localhost:3000/api/auth/me', {
       headers: { 'Authorization': 'Bearer ' + token },
     })
       .then(res => res.json())
@@ -19,10 +19,16 @@ function Home() {
         if (data.username) {
           setUser(data);
         } else {
-          setMessage('Invalid or expired token.');
+          setMessage(data.message || 'Invalid or expired token.');
+          localStorage.removeItem('token');
+          window.location.href = '/login';
         }
       })
-      .catch(() => setMessage('Error fetching user info.'));
+      .catch(() => {
+        setMessage('Error fetching user info.');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      });
   }, []);
 
   if (user) {

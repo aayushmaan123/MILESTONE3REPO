@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 // Login page for authenticating a user
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -13,7 +14,7 @@ function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setMessage('');
-    const res = await fetch('http://localhost:5000/login', {
+    const res = await fetch('http://localhost:3000/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),

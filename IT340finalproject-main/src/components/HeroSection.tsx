@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DotScreenShader } from '@/components/ui/dot-shader-background';
 
@@ -38,21 +39,16 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex justify-center"
           >
-            <Button 
-              size="lg" 
-              className="text-base font-normal px-8 py-6 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200"
-            >
-              Shop Now
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-base font-normal px-8 py-6 border-border hover:bg-secondary transition-all duration-200"
-            >
-              Explore Collection
-            </Button>
+            <Link to="/shop">
+              <Button 
+                size="lg" 
+                className="text-base font-normal px-8 py-6 bg-foreground text-background hover:bg-foreground/90 transition-all duration-200"
+              >
+                Shop Now
+              </Button>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

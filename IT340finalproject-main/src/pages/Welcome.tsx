@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { LoginInput } from '@/components/ui/login-form';
 import sneakerBg from '@/assets/sneaker-4.jpg';
 
 const Welcome = () => {

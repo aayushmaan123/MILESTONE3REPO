@@ -85,6 +85,8 @@ const CreateAccount = () => {
         const data = await res.json();
         if (res.ok && data.username && data.token) {
           localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.username);
+          window.dispatchEvent(new Event('authChange'));
           navigate('/welcome', { state: { username: data.username } });
         } else {
           alert(data.message || 'Signup failed');

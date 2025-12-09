@@ -19,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     setApiMessage('');
     // Send login request to backend
-    const res = await fetch('http://localhost:5000/login', {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
@@ -27,7 +27,8 @@ const Login = () => {
     const data = await res.json();
     if (res.ok && data.token) {
       localStorage.setItem('token', data.token);
-      navigate('/');
+      localStorage.setItem('username', data.username || '');
+      navigate('/login-success', { state: { username: data.username } });
     } else {
       setApiMessage(data.message || 'Login failed');
     }

@@ -1,11 +1,36 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, Search, Menu, Footprints } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { ShoppingCart, User, Search, Menu, Footprints, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in on mount and when storage changes
+    checkAuthState();
+    window.addEventListener('storage', checkAuthState);
+    return () => window.removeEventListener('storage', checkAuthState);
+  }, []);
+
+  const checkAuthState = () => {
+    const token = localStorage.getItem('token');
+    const storedUsername = localStorage.getItem('username');
+    setIsLoggedIn(!!token);
+    setUsername(storedUsername || '');
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername('');
+    navigate('/');
+  };
 
   return (
     <motion.nav
@@ -41,23 +66,42 @@ export function Navigation() {
             <IconButton icon={ShoppingCart} label="Cart" />
             
             <div className="hidden md:flex items-center gap-2 ml-2">
-              <Link to="/login">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="font-light transition-all duration-200 hover:bg-secondary"
-                >
-                  Log in
-                </Button>
-              </Link>
-              <Link to="/create-account">
-                <Button
-                  size="sm"
-                  className="font-light transition-all duration-200 bg-foreground text-background hover:bg-foreground/90"
-                >
-                  Sign up
-                </Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <span className="text-sm text-muted-foreground mr-2">
+                    {username}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="font-light transition-all duration-200 hover:bg-secondary"
+                  >
+                    <LogOut className="w-4 h-4 mr-1" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="font-light transition-all duration-200 hover:bg-secondary"
+                    >
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/create-account">
+                    <Button
+                      size="sm"
+                      className="font-light transition-all duration-200 bg-foreground text-background hover:bg-foreground/90"
+                    >
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -85,21 +129,39 @@ export function Navigation() {
               <NavLink href="#sale" mobile>Sale</NavLink>
               <NavLink href="#about" mobile>About</NavLink>
               <div className="flex gap-2 pt-4 border-t border-border">
-                <Link to="/login" className="flex-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full font-light"
-                  >
-                    Log in
-                  </Button>
-                </Link>
-                <Link to="/create-account" className="flex-1">
-                  <Button
-                    className="w-full font-light bg-foreground text-background hover:bg-foreground/90"
-                  >
-                    Sign up
-                  </Button>
-                </Link>
+                {isLoggedIn ? (
+                  <div className="flex flex-col gap-2 w-full">
+                    <span className="text-sm text-muted-foreground text-center">
+                      {username}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      onClick={handleSignOut}
+                      className="w-full font-light"
+                    >
+                      <LogOut className="w-4 h-4 mr-1" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/login" className="flex-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full font-light"
+                      >
+                        Log in
+                      </Button>
+                    </Link>
+                    <Link to="/create-account" className="flex-1">
+                      <Button
+                        className="w-full font-light bg-foreground text-background hover:bg-foreground/90"
+                      >
+                        Sign up
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

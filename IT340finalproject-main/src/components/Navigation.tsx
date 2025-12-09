@@ -14,7 +14,12 @@ export function Navigation() {
     // Check if user is logged in on mount and when storage changes
     checkAuthState();
     window.addEventListener('storage', checkAuthState);
-    return () => window.removeEventListener('storage', checkAuthState);
+    // Listen for custom auth change events for same-tab updates
+    window.addEventListener('authChange', checkAuthState);
+    return () => {
+      window.removeEventListener('storage', checkAuthState);
+      window.removeEventListener('authChange', checkAuthState);
+    };
   }, []);
 
   const checkAuthState = () => {
@@ -29,6 +34,8 @@ export function Navigation() {
     localStorage.removeItem('username');
     setIsLoggedIn(false);
     setUsername('');
+    // Dispatch custom event to update other components
+    window.dispatchEvent(new Event('authChange'));
     navigate('/');
   };
 

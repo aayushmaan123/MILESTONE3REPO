@@ -28,6 +28,7 @@ const Login = () => {
     if (res.ok && data.token) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('username', data.username || '');
+      window.dispatchEvent(new Event('authChange'));
       navigate('/login-success', { state: { username: data.username } });
     } else {
       setApiMessage(data.message || 'Login failed');

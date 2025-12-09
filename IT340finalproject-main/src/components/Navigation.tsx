@@ -2,10 +2,18 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, User, Search, Menu, Footprints } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, username, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <motion.nav
@@ -41,23 +49,41 @@ export function Navigation() {
             <IconButton icon={ShoppingCart} label="Cart" />
             
             <div className="hidden md:flex items-center gap-2 ml-2">
-              <Link to="/login">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="font-light transition-all duration-200 hover:bg-secondary"
-                >
-                  Log in
-                </Button>
-              </Link>
-              <Link to="/create-account">
-                <Button
-                  size="sm"
-                  className="font-light transition-all duration-200 bg-foreground text-background hover:bg-foreground/90"
-                >
-                  Sign up
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <span className="text-sm text-foreground font-medium px-3">
+                    {username}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="font-light transition-all duration-200 hover:bg-secondary"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="font-light transition-all duration-200 hover:bg-secondary"
+                    >
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/create-account">
+                    <Button
+                      size="sm"
+                      className="font-light transition-all duration-200 bg-foreground text-background hover:bg-foreground/90"
+                    >
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -85,21 +111,38 @@ export function Navigation() {
               <NavLink href="#sale" mobile>Sale</NavLink>
               <NavLink href="#about" mobile>About</NavLink>
               <div className="flex gap-2 pt-4 border-t border-border">
-                <Link to="/login" className="flex-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full font-light"
-                  >
-                    Log in
-                  </Button>
-                </Link>
-                <Link to="/create-account" className="flex-1">
-                  <Button
-                    className="w-full font-light bg-foreground text-background hover:bg-foreground/90"
-                  >
-                    Sign up
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <span className="text-sm text-foreground font-medium px-3 py-2">
+                      {username}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      onClick={handleLogout}
+                      className="flex-1 font-light"
+                    >
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="flex-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full font-light"
+                      >
+                        Log in
+                      </Button>
+                    </Link>
+                    <Link to="/create-account" className="flex-1">
+                      <Button
+                        className="w-full font-light bg-foreground text-background hover:bg-foreground/90"
+                      >
+                        Sign up
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

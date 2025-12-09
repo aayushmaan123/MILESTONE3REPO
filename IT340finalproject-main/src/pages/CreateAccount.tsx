@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LoginInput } from '@/components/ui/login-form';
+import { useAuth } from '@/hooks/useAuth';
 import sneakerBg from '@/assets/sneaker-4.jpg';
 
 const CreateAccount = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [formData, setFormData] = useState({
@@ -84,7 +86,7 @@ const CreateAccount = () => {
         });
         const data = await res.json();
         if (res.ok && data.username && data.token) {
-          localStorage.setItem('token', data.token);
+          login(data.token, data.username);
           navigate('/welcome', { state: { username: data.username } });
         } else {
           alert(data.message || 'Signup failed');

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LoginInput } from '@/components/ui/login-form';
+import { useAuth } from '@/hooks/useAuth';
 import sneakerBg from '@/assets/sneaker-1.jpg';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
@@ -18,18 +20,22 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiMessage('');
-    // Send login request to backend
-    const res = await fetch('http://localhost:5000/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    });
-    const data = await res.json();
-    if (res.ok && data.token) {
-      localStorage.setItem('token', data.token);
-      navigate('/');
-    } else {
-      setApiMessage(data.message || 'Login failed');
+    try {
+      // Send login request to backend
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      if (res.ok && data.token && data.username) {
+        login(data.token, data.username);
+        navigate('/login-successful', { state: { username: data.username } });
+      } else {
+        setApiMessage(data.message || 'Login failed');
+      }
+    } catch (err) {
+      setApiMessage('Network error. Make sure your backend is running.');
     }
   };
 
